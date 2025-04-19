@@ -37,10 +37,8 @@ public class ManualAgent : AgentApplication
     private Task Logout(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken) =>
         UserAuthorization.SignOutUserAsync(turnContext, turnState, "graph");
 
-    private async Task OnMessageActivity(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)
-    {
-        await UserAuthorization.SignInUserAsync(turnContext, turnState, "graph", cancellationToken: cancellationToken);
-    }
+    private Task OnMessageActivity(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken) => 
+        UserAuthorization.SignInUserAsync(turnContext, turnState, "graph", cancellationToken: cancellationToken);
 
     private async Task Me(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)
     {
