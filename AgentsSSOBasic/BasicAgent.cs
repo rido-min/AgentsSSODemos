@@ -52,7 +52,6 @@ public class BasicAgent : AgentApplication
             var tokenResponse = await _oAuthFlow.BeginFlowAsync(turnContext, null, cancellationToken);
             string displayName = await GraphClient.GetDisplayName(tokenResponse.Token);
             await turnContext.SendActivityAsync($"**{displayName} said:** {turnContext.Activity.Text}", cancellationToken: cancellationToken);
-
         }
     }
 
