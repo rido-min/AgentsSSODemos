@@ -11,7 +11,7 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Services.AddAgentAspNetAuthentication(builder.Configuration);
 builder.AddAgentApplicationOptions();
-builder.AddAgent<AuthAgent>();
+builder.AddAgent<ManualAgent>();
 builder.Services.AddSingleton<IStorage, MemoryStorage>();
 var app = builder.Build();
 

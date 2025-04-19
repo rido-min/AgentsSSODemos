@@ -4,13 +4,14 @@ using Microsoft.Agents.Builder.State;
 using Microsoft.Agents.Builder.UserAuth.TokenService;
 using Microsoft.Agents.Core.Models;
 using Microsoft.MarkedNet;
+using System.Text.RegularExpressions;
 
 namespace AgentsSSO;
 
-public class AuthAgent : AgentApplication
+public class BasicAgent : AgentApplication
 {
     private readonly OAuthFlow _oAuthFlow;
-    public AuthAgent(AgentApplicationOptions options) : base(options)
+    public BasicAgent(AgentApplicationOptions options) : base(options)
     {
         _oAuthFlow = new OAuthFlow(new OAuthSettings { AzureBotOAuthConnectionName = "SSOSelf", Text = "login", Title= "Login"});
 
@@ -37,13 +38,22 @@ public class AuthAgent : AgentApplication
 
     private async Task OnMessageActivity(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)
     {
-        var tokenResponse = await _oAuthFlow.ContinueFlowAsync(turnContext, DateTime.UtcNow + TimeSpan.FromMinutes(5), cancellationToken);
-
-        if (tokenResponse != null)
+        if (Regex.Match(turnContext.Activity.Text, @"(\d{6})").Success)
         {
-            await turnContext.SendActivityAsync("Login Successful, token length" + tokenResponse.Token.Length);
+            var tokenResponse = await _oAuthFlow.ContinueFlowAsync(turnContext, DateTime.UtcNow + TimeSpan.FromMinutes(5), cancellationToken);
+            if (tokenResponse != null)
+            {
+                string displayName = await GraphClient.GetDisplayName(tokenResponse.Token);
+                await turnContext.SendActivityAsync("Your display name is: " + displayName);
+            }
         }
-        await turnContext.SendActivityAsync("You said: " + turnContext.Activity.Text);
+        else
+        {
+            var tokenResponse = await _oAuthFlow.BeginFlowAsync(turnContext, null, cancellationToken);
+            string displayName = await GraphClient.GetDisplayName(tokenResponse.Token);
+            await turnContext.SendActivityAsync($"**{displayName} said:** {turnContext.Activity.Text}", cancellationToken: cancellationToken);
+
+        }
     }
 
     private async Task Me(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)

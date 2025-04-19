@@ -5,9 +5,9 @@ using Microsoft.Agents.Core.Models;
 
 namespace AgentsSSOAuto;
 
-public class AuthAgent : AgentApplication
+public class AutoAgent : AgentApplication
 {
-    public AuthAgent(AgentApplicationOptions options) : base(options)
+    public AutoAgent(AgentApplicationOptions options) : base(options)
     {
         OnConversationUpdate("membersAdded", Welcome);
         OnMessage("/help", Welcome);
