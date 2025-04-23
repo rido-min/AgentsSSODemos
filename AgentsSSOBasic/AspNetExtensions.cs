@@ -12,7 +12,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace Microsoft.Agents.Samples;
+namespace AgentsSSOBasic;
 
 public static class AspNetExtensions
 {

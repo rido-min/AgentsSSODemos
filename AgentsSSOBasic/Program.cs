@@ -1,8 +1,6 @@
-
-using AgentsSSO;
+using AgentsSSOBasic;
 using Microsoft.Agents.Builder;
 using Microsoft.Agents.Hosting.AspNetCore;
-using Microsoft.Agents.Samples;
 using Microsoft.Agents.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
