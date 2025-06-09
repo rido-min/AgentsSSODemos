@@ -30,6 +30,8 @@ namespace AgentsSSOManual
             {
                 using HttpClient client = new HttpClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                client.DefaultRequestHeaders.Add("Accept", "application/vnd.github+json");
+                client.DefaultRequestHeaders.Add("User-Agent", "yo");
                 HttpResponseMessage response = await client.GetAsync(ghpulls);
                 if (response.IsSuccessStatusCode)
                 {
