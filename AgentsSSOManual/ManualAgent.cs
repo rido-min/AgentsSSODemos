@@ -14,10 +14,10 @@ public class ManualAgent : AgentApplication
         OnConversationUpdate("membersAdded", Welcome);
         OnMessage("/help", Welcome);
         OnMessage("/me", Me);
-        OnMessage("/login", Login);
+        //OnMessage("/login", Login);
         OnMessage("/logout", Logout);
         OnActivity(ActivityTypes.Message, OnMessageActivity);
-        UserAuthorization.OnUserSignInSuccess(OnUserSignInSuccess);
+        // UserAuthorization.(OnUserSignInSuccess);
     }
 
     private async Task OnUserSignInSuccess(ITurnContext turnContext, ITurnState turnState, string handlerName, string token, IActivity initiatingActivity, CancellationToken cancellationToken)
@@ -32,18 +32,18 @@ public class ManualAgent : AgentApplication
     private Task Welcome(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken) =>
        turnContext.SendActivityAsync("type /me to query graph, /login to login, /logout to logout or /help to see this message");
 
-    private Task Login(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken) =>
-        UserAuthorization.SignInUserAsync(turnContext, turnState, "graph");
+    //private Task Login(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken) =>
+    //    UserAuthorization.SignInUserAsync(turnContext, turnState, "graph");
 
     private Task Logout(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken) =>
         UserAuthorization.SignOutUserAsync(turnContext, turnState, "graph");
 
-    private Task OnMessageActivity(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken) => 
-        UserAuthorization.SignInUserAsync(turnContext, turnState, "graph", cancellationToken: cancellationToken);
+    private Task OnMessageActivity(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken) =>
+       turnContext.SendActivityAsync("you said: " + turnContext.Activity.Text);
 
     private async Task Me(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)
     {
-        var tokenResponse = UserAuthorization.GetTurnToken("graph");
+        var tokenResponse = await  UserAuthorization.GetTurnTokenAsync(turnContext, "graph", cancellationToken);
 
         if (tokenResponse != null)
         {

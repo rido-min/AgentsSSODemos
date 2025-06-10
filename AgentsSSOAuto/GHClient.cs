@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
-namespace AgentsSSOManual
+namespace AgentsSSOAuto
 {
 
     public class PR
@@ -13,18 +13,17 @@ namespace AgentsSSOManual
 
         [JsonPropertyName("url")]
         public string Url { get; set; } = string.Empty;
+
+        [JsonPropertyName("number")]
+        public int Number { get; set; } = 0;
     }
 
-    public class PRList
-    {
-        public IList<PR> prs { get; set; } = new List<PR>();
-    }
 
     public class GHClient
     {
         public static async Task<string> GetPRs(string accessToken)
         {
-            string displayName = "unknown";
+            string displayName = "";
             string ghpulls = $"https://api.github.com/repos/microsoft/agents/pulls";
             try
             {
@@ -36,10 +35,11 @@ namespace AgentsSSOManual
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    PRList prlist = JsonSerializer.Deserialize<PRList>(content)!;
-                    //var graphResponse = JsonNode.Parse(content);
-                    //displayName = graphResponse!["displayName"]!.GetValue<string>();
-                    displayName = string.Join(' ', prlist);
+                    var prlist = JsonSerializer.Deserialize<PR[]>(content)!;
+                    foreach (var pr in prlist)
+                    {
+                        displayName += $"**{pr.Number}** {pr.Title} \r\n";
+                    }
                 }
             }
             catch (Exception ex)

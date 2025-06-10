@@ -11,9 +11,9 @@ public class AutoAgent : AgentApplication
     {
         OnConversationUpdate("membersAdded", Welcome);
         OnMessage("/help", Welcome);
-        OnMessage("/me", Me);
+        OnMessage("/me", Me, autoSignInHandlers: ["graph"]);
         OnMessage("/logout", Logout);
-        OnActivity(ActivityTypes.Message, OnMessageActivity);
+        OnActivity(ActivityTypes.Message, OnMessageActivity, rank: RouteRank.Last, ["graph", "gh"]);
     }
 
     private Task Welcome(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken) =>
@@ -24,20 +24,32 @@ public class AutoAgent : AgentApplication
     
     private async Task OnMessageActivity(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)
     {
-        var token = UserAuthorization.GetTurnToken("graph");
-        
-        if (string.IsNullOrEmpty(token))
+        var tokenGh = await UserAuthorization.GetTurnTokenAsync(turnContext, "gh", cancellationToken: cancellationToken);
+        var tokenGraph = await UserAuthorization.GetTurnTokenAsync(turnContext, "graph", cancellationToken: cancellationToken);
+
+        if (string.IsNullOrEmpty(tokenGh))
         {
             await turnContext.SendActivityAsync($"The auto sign in process failed and no access token is available", cancellationToken: cancellationToken);
             return;
         }
-        var displayName = await GraphClient.GetDisplayName(token);
+        var displayName = await GraphClient.GetDisplayName(tokenGraph);
         await turnContext.SendActivityAsync($"**{displayName} said:** {turnContext.Activity.Text}", cancellationToken: cancellationToken);
+
+        var prs = await GHClient.GetPRs(tokenGh);
+        if (!string.IsNullOrEmpty(prs))
+        {
+            await turnContext.SendActivityAsync($"{prs}", cancellationToken: cancellationToken);
+        }
+        else
+        {
+            await turnContext.SendActivityAsync("No PRs found or you are not authorized to view them.", cancellationToken: cancellationToken);
+        }
+
     }
 
     private async Task Me(ITurnContext turnContext, ITurnState turnState, CancellationToken cancellationToken)
     {
-        var token = UserAuthorization.GetTurnToken("graph");
+        var token = await UserAuthorization.GetTurnTokenAsync(turnContext, "graph");
 
         if (token != null)
         {
